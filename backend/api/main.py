@@ -162,6 +162,12 @@ async def get_overview():
                     change_30d = stats.get("changes", {}).get("30d", {}).get("change_pct")
                     status = LiquidityProcessor.determine_status(change_30d, primary.direction or "up_is_loose")
 
+                    # Apply unit_divisor to display value
+                    unit_divisor = primary.unit_divisor or 1.0
+                    current_value = stats.get("current_value")
+                    if current_value is not None:
+                        current_value = round(current_value / unit_divisor, 2)
+
                     primary_data = {
                         "indicator": {
                             "id": primary.id,
@@ -169,7 +175,7 @@ async def get_overview():
                             "name_en": primary.name_en,
                             "unit": primary.unit
                         },
-                        "current_value": stats.get("current_value"),
+                        "current_value": current_value,
                         "current_date": stats.get("current_date"),
                         "changes": stats.get("changes", {}),
                         "status": status

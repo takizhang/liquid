@@ -56,10 +56,11 @@ async def get_market_detail(
     if primary:
         latest = await repo.get_latest_data_point(primary.id)
         if latest:
+            unit_divisor = primary.unit_divisor or 1.0
             result["primary_indicator"] = {
                 "id": primary.id,
                 "name": primary.name,
-                "current_value": latest.value,
+                "current_value": round(latest.value / unit_divisor, 2),
                 "unit": primary.unit
             }
 
@@ -99,7 +100,8 @@ async def get_market_indicators(
 
         if ind.id in latest_data:
             dp = latest_data[ind.id]
-            item["current_value"] = dp.value
+            unit_divisor = ind.unit_divisor or 1.0
+            item["current_value"] = round(dp.value / unit_divisor, 2)
             item["current_date"] = dp.timestamp.isoformat()
 
             # Calculate changes
