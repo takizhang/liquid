@@ -12,13 +12,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.storage import init_db
 from backend.api.routes import markets, indicators, analysis
+from backend.scheduler import start_scheduler, stop_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
+    """Initialize database and scheduler on startup."""
     await init_db()
+    start_scheduler()
     yield
+    stop_scheduler()
 
 
 app = FastAPI(
