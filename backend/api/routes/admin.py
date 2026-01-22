@@ -1,7 +1,7 @@
 """Admin routes for system management."""
 from fastapi import APIRouter, HTTPException
 from backend.storage import get_session, IndicatorRepository, init_db
-from backend.core import Indicator
+from backend.storage.models import Indicator
 import yaml
 from pathlib import Path
 
