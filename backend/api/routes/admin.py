@@ -57,3 +57,58 @@ async def trigger_data_collection():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/collect-sync")
+async def collect_data_sync():
+    """Synchronously collect data for debugging."""
+    import os
+    from backend.core import CollectorRegistry
+    from backend.storage import get_session, IndicatorRepository
+    import backend.collectors  # noqa
+
+    results = []
+    errors = []
+
+    # Check env vars
+    fred_key = os.getenv("FRED_API_KEY", "")
+    results.append(f"FRED_API_KEY configured: {bool(fred_key)}")
+
+    session = await get_session()
+    repo = IndicatorRepository(session)
+
+    # Get all indicators
+    indicators = await repo.get_all_indicators()
+    results.append(f"Found {len(indicators)} indicators")
+
+    # Try to collect data for first FRED indicator
+    fred_indicators = [i for i in indicators if i.source == "FRED"]
+    if fred_indicators:
+        indicator = fred_indicators[0]
+        results.append(f"Testing indicator: {indicator.id}, series_id: {indicator.series_id}")
+
+        try:
+            collector_class = CollectorRegistry.get_collector("FRED")
+            if collector_class:
+                collector = collector_class()
+                data_points = await collector.fetch(
+                    indicator_id=indicator.id,
+                    series_id=indicator.series_id,
+                    market=indicator.market
+                )
+                results.append(f"Fetched {len(data_points)} data points")
+
+                if data_points:
+                    await repo.save_data_points(data_points)
+                    results.append(f"Saved {len(data_points)} data points")
+            else:
+                errors.append("FRED collector not found")
+        except Exception as e:
+            errors.append(f"Error: {str(e)}")
+
+    await session.close()
+
+    return {
+        "results": results,
+        "errors": errors
+    }
