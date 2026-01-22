@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.storage import init_db
-from backend.api.routes import markets, indicators, analysis
+from backend.api.routes import markets, indicators, analysis, admin
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ app.add_middleware(
 app.include_router(markets.router)
 app.include_router(indicators.router)
 app.include_router(analysis.router)
+app.include_router(admin.router)
 
 
 @app.get("/")
