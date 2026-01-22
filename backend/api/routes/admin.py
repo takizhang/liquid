@@ -96,41 +96,53 @@ async def check_env():
 async def collect_all_sync():
     """Synchronously collect ALL data for debugging."""
     import os
-    from backend.core import CollectorRegistry
+    import traceback
     from backend.storage import get_session, IndicatorRepository
-    import backend.collectors  # noqa
 
     results = []
     errors = []
 
-    session = await get_session()
-    repo = IndicatorRepository(session)
+    try:
+        import backend.collectors  # noqa
+        from backend.core import CollectorRegistry
+        results.append(f"Collectors loaded: {list(CollectorRegistry._collectors.keys())}")
+    except Exception as e:
+        errors.append(f"Failed to load collectors: {str(e)}")
+        return {"results": results, "errors": errors}
 
-    indicators = await repo.get_all_indicators()
-    results.append(f"Found {len(indicators)} indicators")
+    try:
+        session = await get_session()
+        repo = IndicatorRepository(session)
 
-    for indicator in indicators:
-        if indicator.is_computed:
-            results.append(f"Skipping computed: {indicator.id}")
-            continue
+        indicators = await repo.get_all_indicators()
+        results.append(f"Found {len(indicators)} indicators")
 
-        try:
-            collector = CollectorRegistry.get(indicator.source)
-            data_points = await collector.fetch(
-                indicator_id=indicator.id,
-                series_id=indicator.series_id,
-                market=indicator.market
-            )
+        for indicator in indicators:
+            if indicator.is_computed:
+                results.append(f"Skipping computed: {indicator.id}")
+                continue
 
-            if data_points:
-                await repo.save_data_points(data_points)
-                results.append(f"✓ {indicator.id}: {len(data_points)} points")
-            else:
-                errors.append(f"✗ {indicator.id}: no data")
+            try:
+                collector = CollectorRegistry.get(indicator.source)
+                data_points = await collector.fetch(
+                    indicator_id=indicator.id,
+                    series_id=indicator.series_id,
+                    market=indicator.market
+                )
 
-        except Exception as e:
-            errors.append(f"✗ {indicator.id}: {str(e)[:50]}")
+                if data_points:
+                    await repo.save_data_points(data_points)
+                    results.append(f"✓ {indicator.id}: {len(data_points)} points")
+                else:
+                    errors.append(f"✗ {indicator.id}: no data")
 
-    await session.close()
+            except Exception as e:
+                errors.append(f"✗ {indicator.id}: {str(e)[:80]}")
+
+        await session.close()
+
+    except Exception as e:
+        errors.append(f"DB error: {str(e)}")
+        errors.append(traceback.format_exc()[:500])
 
     return {"results": results, "errors": errors}
