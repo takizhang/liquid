@@ -1,0 +1,530 @@
+# Liquidity Monitor - Indicators Configuration
+
+# Macro factor categories
+categories:
+  - id: liquidity
+    name: 流动性
+    name_en: Liquidity
+    description: 直接反映市场流动性的核心指标
+    color: blue
+
+  - id: rates
+    name: 利率
+    name_en: Interest Rates
+    description: 各类利率指标
+    color: purple
+
+  - id: currency
+    name: 货币供应
+    name_en: Money Supply
+    description: 货币供应量指标
+    color: green
+
+  - id: crypto
+    name: 加密货币
+    name_en: Cryptocurrency
+    description: 加密货币市场指标
+    color: orange
+
+# Markets
+markets:
+  - id: us
+    name: 美国
+    emoji: "🇺🇸"
+
+  - id: china
+    name: 中国
+    emoji: "🇨🇳"
+
+  - id: crypto
+    name: 加密货币
+    emoji: "🪙"
+
+# Indicators
+indicators:
+  # ==================== US Market ====================
+  - id: fed_balance_sheet
+    name: Fed资产负债表
+    name_en: Fed Balance Sheet
+    source: FRED
+    series_id: WALCL
+    market: us
+    category: liquidity
+    update_frequency: weekly
+    unit: T
+    unit_divisor: 1000000
+    direction: up_is_loose
+    impact:
+      up: QE/扩表 = 利好风险资产
+      down: QT/缩表 = 利空风险资产
+    description: 美联储总资产，反映货币政策松紧程度
+    is_primary: true
+
+  - id: rrp
+    name: 逆回购 RRP
+    name_en: Reverse Repo
+    source: FRED
+    series_id: RRPONTSYD
+    market: us
+    category: liquidity
+    update_frequency: daily
+    unit: T
+    unit_divisor: 1000000
+    direction: down_is_loose
+    impact:
+      up: 流动性被吸收，利空风险资产
+      down: 流动性释放，利好风险资产
+    description: 美联储隔夜逆回购规模
+
+  - id: tga
+    name: 财政部TGA账户
+    name_en: Treasury General Account
+    source: FRED
+    series_id: WTREGEN
+    market: us
+    category: liquidity
+    update_frequency: weekly
+    unit: T
+    unit_divisor: 1000000
+    direction: down_is_loose
+    impact:
+      up: 财政部囤积现金，流动性收紧
+      down: 财政部支出，流动性释放
+    description: 美国财政部在美联储的存款账户
+
+  - id: m2_us
+    name: M2货币供应
+    name_en: M2 Money Supply
+    source: FRED
+    series_id: M2SL
+    market: us
+    category: currency
+    update_frequency: monthly
+    unit: T
+    unit_divisor: 1000
+    direction: up_is_loose
+    impact:
+      up: 货币供应增加，利好风险资产
+      down: 货币供应减少，流动性收紧
+    description: 美国M2货币供应量
+
+  - id: fed_funds_rate
+    name: 联邦基金利率
+    name_en: Federal Funds Rate
+    source: FRED
+    series_id: FEDFUNDS
+    market: us
+    category: rates
+    update_frequency: monthly
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 加息，流动性收紧
+      down: 降息，流动性宽松
+    description: 美联储政策利率
+
+  - id: us_10y
+    name: 10年期国债收益率
+    name_en: 10-Year Treasury Yield
+    source: FRED
+    series_id: DGS10
+    market: us
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 长端利率上升，风险资产承压
+      down: 长端利率下降，利好风险资产
+    description: 美国10年期国债收益率
+
+  - id: us_2y
+    name: 2年期国债收益率
+    name_en: 2-Year Treasury Yield
+    source: FRED
+    series_id: DGS2
+    market: us
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 短端利率上升，加息预期增强
+      down: 短端利率下降，降息预期增强
+    description: 美国2年期国债收益率
+
+  - id: yield_curve
+    name: 收益率曲线(10Y-2Y)
+    name_en: Yield Curve Spread
+    source: FRED
+    series_id: T10Y2Y
+    market: us
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: up_is_loose
+    impact:
+      up: 曲线陡峭化，经济预期改善
+      down: 曲线倒挂，衰退风险上升
+    description: 10年期与2年期国债收益率之差
+
+  - id: dxy
+    name: 美元指数
+    name_en: US Dollar Index
+    source: FRED
+    series_id: DTWEXBGS
+    market: us
+    category: currency
+    update_frequency: daily
+    unit: ""
+    direction: down_is_loose
+    impact:
+      up: 美元走强，全球流动性收紧
+      down: 美元走弱，全球流动性宽松
+    description: 美元对一篮子货币的加权指数
+
+  - id: vix
+    name: VIX恐慌指数
+    name_en: VIX Volatility Index
+    source: FRED
+    series_id: VIXCLS
+    market: us
+    category: liquidity
+    update_frequency: daily
+    unit: ""
+    direction: down_is_loose
+    impact:
+      up: 市场恐慌，风险偏好下降
+      down: 市场平静，风险偏好上升
+    description: 标普500期权隐含波动率指数
+
+  - id: net_liquidity
+    name: 净流动性
+    name_en: Net Liquidity
+    source: FRED
+    series_id: NET_LIQUIDITY
+    market: us
+    category: liquidity
+    update_frequency: weekly
+    unit: T
+    unit_divisor: 1000000
+    direction: up_is_loose
+    impact:
+      up: 净流动性增加，利好风险资产
+      down: 净流动性减少，利空风险资产
+    description: Fed资产负债表 - RRP - TGA
+    is_computed: true
+
+  # ==================== China Market ====================
+  - id: shibor_on
+    name: SHIBOR隔夜
+    name_en: SHIBOR Overnight
+    source: AkShare
+    series_id: SHIBOR_ON
+    market: china
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 短期资金紧张
+      down: 短期资金宽松
+    description: 上海银行间同业拆借利率（隔夜）
+    is_primary: true
+
+  - id: shibor_1w
+    name: SHIBOR 1周
+    name_en: SHIBOR 1 Week
+    source: AkShare
+    series_id: SHIBOR_1W
+    market: china
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 短期资金紧张
+      down: 短期资金宽松
+    description: 上海银行间同业拆借利率（1周）
+
+  - id: m2_china
+    name: M2货币供应
+    name_en: M2 Money Supply
+    source: AkShare
+    series_id: MACRO_M2
+    market: china
+    category: currency
+    update_frequency: monthly
+    unit: 万亿
+    unit_divisor: 10000
+    direction: up_is_loose
+    impact:
+      up: 货币供应增加，流动性宽松
+      down: 货币供应减少，流动性收紧
+    description: 中国M2广义货币供应量
+
+  - id: m1_china
+    name: M1货币供应
+    name_en: M1 Money Supply
+    source: AkShare
+    series_id: MACRO_M1
+    market: china
+    category: currency
+    update_frequency: monthly
+    unit: 万亿
+    unit_divisor: 10000
+    direction: up_is_loose
+    impact:
+      up: 活期货币增加，经济活跃
+      down: 活期货币减少，经济放缓
+    description: 中国M1狭义货币供应量
+
+  - id: lpr_1y
+    name: LPR 1年期
+    name_en: LPR 1 Year
+    source: AkShare
+    series_id: LPR_1Y
+    market: china
+    category: rates
+    update_frequency: monthly
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 贷款利率上升，流动性收紧
+      down: 贷款利率下降，流动性宽松
+    description: 贷款市场报价利率（1年期）
+
+  - id: lpr_5y
+    name: LPR 5年期
+    name_en: LPR 5 Year
+    source: AkShare
+    series_id: LPR_5Y
+    market: china
+    category: rates
+    update_frequency: monthly
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 房贷利率上升，地产承压
+      down: 房贷利率下降，利好地产
+    description: 贷款市场报价利率（5年期）
+
+  - id: china_10y
+    name: 10年期国债收益率
+    name_en: China 10Y Bond Yield
+    source: AkShare
+    series_id: BOND_10Y
+    market: china
+    category: rates
+    update_frequency: daily
+    unit: "%"
+    direction: down_is_loose
+    impact:
+      up: 长端利率上升，风险资产承压
+      down: 长端利率下降，利好风险资产
+    description: 中国10年期国债收益率
+
+  - id: forex_reserve
+    name: 外汇储备
+    name_en: Forex Reserve
+    source: AkShare
+    series_id: MACRO_FOREX
+    market: china
+    category: liquidity
+    update_frequency: monthly
+    unit: 亿美元
+    direction: up_is_loose
+    impact:
+      up: 外汇储备增加，汇率稳定
+      down: 外汇储备减少，资本外流压力
+    description: 中国外汇储备规模
+
+  # ==================== Crypto Market ====================
+  - id: btc_price
+    name: BTC价格
+    name_en: Bitcoin Price
+    source: CoinGecko
+    series_id: PRICE_bitcoin
+    market: crypto
+    category: crypto
+    update_frequency: hourly
+    unit: "$"
+    direction: up_is_loose
+    impact:
+      up: 风险偏好上升
+      down: 风险偏好下降
+    description: 比特币美元价格
+    is_primary: true
+
+  - id: eth_price
+    name: ETH价格
+    name_en: Ethereum Price
+    source: CoinGecko
+    series_id: PRICE_ethereum
+    market: crypto
+    category: crypto
+    update_frequency: hourly
+    unit: "$"
+    direction: up_is_loose
+    impact:
+      up: 风险偏好上升
+      down: 风险偏好下降
+    description: 以太坊美元价格
+
+  - id: stablecoin_mcap
+    name: 稳定币总市值
+    name_en: Stablecoin Market Cap
+    source: CoinGecko
+    series_id: STABLECOIN_MCAP
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: 加密市场流动性增加
+      down: 加密市场流动性减少
+    description: 所有稳定币的总市值
+
+  - id: btc_mcap
+    name: BTC市值
+    name_en: Bitcoin Market Cap
+    source: CoinGecko
+    series_id: MCAP_bitcoin
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: T
+    unit_divisor: 1000000000000
+    direction: up_is_loose
+    impact:
+      up: 加密市场扩张
+      down: 加密市场收缩
+    description: 比特币总市值
+
+  - id: total_crypto_mcap
+    name: 加密货币总市值
+    name_en: Total Crypto Market Cap
+    source: CoinGecko
+    series_id: TOTAL_MCAP
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: T
+    unit_divisor: 1000000000000
+    direction: up_is_loose
+    impact:
+      up: 加密市场整体扩张
+      down: 加密市场整体收缩
+    description: 所有加密货币的总市值
+
+  - id: btc_dominance
+    name: BTC市值占比
+    name_en: Bitcoin Dominance
+    source: CoinGecko
+    series_id: BTC_DOMINANCE
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: "%"
+    direction: neutral
+    impact:
+      up: 资金流向BTC，避险情绪
+      down: 资金流向山寨币，风险偏好上升
+    description: 比特币市值占加密货币总市值的比例
+
+  - id: defi_tvl
+    name: DeFi总锁仓量
+    name_en: DeFi TVL
+    source: CoinGecko
+    series_id: DEFI_TVL
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: DeFi生态活跃，链上流动性充裕
+      down: DeFi资金流出，链上流动性收紧
+    description: 去中心化金融协议总锁仓价值
+
+  - id: usdt_mcap
+    name: USDT市值
+    name_en: USDT Market Cap
+    source: CoinGecko
+    series_id: MCAP_tether
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: 稳定币流入，买盘增加
+      down: 稳定币流出，卖压增加
+    description: Tether USDT市值
+
+  - id: usdc_mcap
+    name: USDC市值
+    name_en: USDC Market Cap
+    source: CoinGecko
+    series_id: MCAP_usd-coin
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: 合规稳定币流入
+      down: 合规稳定币流出
+    description: Circle USDC市值
+
+  - id: btc_volume
+    name: BTC交易量
+    name_en: Bitcoin Trading Volume
+    source: CoinGecko
+    series_id: VOLUME_bitcoin
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: 市场活跃度上升
+      down: 市场活跃度下降
+    description: 比特币24小时交易量
+
+  - id: eth_volume
+    name: ETH交易量
+    name_en: Ethereum Trading Volume
+    source: CoinGecko
+    series_id: VOLUME_ethereum
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: B
+    unit_divisor: 1000000000
+    direction: up_is_loose
+    impact:
+      up: 市场活跃度上升
+      down: 市场活跃度下降
+    description: 以太坊24小时交易量
+
+  - id: fear_greed
+    name: 恐惧贪婪指数
+    name_en: Fear & Greed Index
+    source: CoinGecko
+    series_id: FEAR_GREED
+    market: crypto
+    category: crypto
+    update_frequency: daily
+    unit: ""
+    direction: up_is_loose
+    impact:
+      up: 市场贪婪，可能见顶
+      down: 市场恐惧，可能见底
+    description: 加密货币市场情绪指数(0-100)
