@@ -49,6 +49,9 @@ async def collect_all_data():
                 else:
                     logger.warning(f"No data returned for {indicator.name}")
 
+                # Add delay to avoid API rate limits (especially for CoinGecko)
+                await asyncio.sleep(2)
+
             except Exception as e:
                 logger.error(f"Error collecting data for {indicator.name}: {e}")
                 continue
