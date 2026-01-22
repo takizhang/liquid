@@ -5,7 +5,9 @@ WORKDIR /app
 # Copy backend code
 COPY backend/ /app/backend/
 COPY config/ /app/config/
-COPY .env.example /app/.env
+
+# Create data directory with proper permissions
+RUN mkdir -p /app/backend/data && chmod 777 /app/backend/data
 
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
