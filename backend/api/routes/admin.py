@@ -24,22 +24,8 @@ async def initialize_indicators():
 
         # Process indicators (they're at top level, not under markets)
         for indicator_config in config.get("indicators", []):
-            # Create indicator object
-            indicator = Indicator(
-                id=indicator_config["id"],
-                name=indicator_config["name"],
-                name_en=indicator_config.get("name_en", indicator_config["name"]),
-                market=indicator_config["market"],
-                source=indicator_config["source"],
-                series_id=indicator_config.get("series_id"),
-                unit=indicator_config.get("unit", ""),
-                description=indicator_config.get("description", ""),
-                is_primary=indicator_config.get("is_primary", False),
-                direction=indicator_config.get("direction", "up_is_loose")
-            )
-
-            # Save to database
-            await repo.save_indicator(indicator)
+            # Save to database using upsert_indicator
+            await repo.upsert_indicator(indicator_config)
             indicators_created += 1
 
         await session.close()
