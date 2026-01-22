@@ -68,8 +68,8 @@ indicators:
     market: us
     category: liquidity
     update_frequency: daily
-    unit: T
-    unit_divisor: 1000000
+    unit: B
+    unit_divisor: 1
     direction: down_is_loose
     impact:
       up: 流动性被吸收，利空风险资产
