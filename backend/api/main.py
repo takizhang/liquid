@@ -16,8 +16,27 @@ from backend.api.routes import markets, indicators, analysis, admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
+    """Initialize database and indicators on startup."""
+    import logging
+    import yaml
+
     await init_db()
+
+    # Auto-initialize indicators from config
+    try:
+        from backend.storage import get_session, IndicatorRepository
+        config_path = Path(__file__).parent.parent.parent / "config" / "indicators.yaml"
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        session = await get_session()
+        repo = IndicatorRepository(session)
+        for indicator_config in config.get("indicators", []):
+            await repo.upsert_indicator(indicator_config)
+        await session.close()
+        logging.info(f"Auto-initialized {len(config.get('indicators', []))} indicators")
+    except Exception as e:
+        logging.error(f"Failed to auto-initialize indicators: {e}")
 
     # Start scheduler in background (optional)
     try:
@@ -26,7 +45,6 @@ async def lifespan(app: FastAPI):
         yield
         stop_scheduler()
     except Exception as e:
-        import logging
         logging.error(f"Scheduler failed to start: {e}")
         yield
 
