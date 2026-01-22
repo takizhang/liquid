@@ -29,12 +29,11 @@ async def collect_all_data():
         for indicator in indicators:
             try:
                 # Get collector for this indicator
-                collector_class = CollectorRegistry.get_collector(indicator.source)
-                if not collector_class:
+                try:
+                    collector = CollectorRegistry.get(indicator.source)
+                except ValueError:
                     logger.warning(f"No collector found for source: {indicator.source}")
                     continue
-
-                collector = collector_class()
 
                 # Fetch data
                 data_points = await collector.fetch(

@@ -88,21 +88,17 @@ async def collect_data_sync():
         results.append(f"Testing indicator: {indicator.id}, series_id: {indicator.series_id}")
 
         try:
-            collector_class = CollectorRegistry.get_collector("FRED")
-            if collector_class:
-                collector = collector_class()
-                data_points = await collector.fetch(
-                    indicator_id=indicator.id,
-                    series_id=indicator.series_id,
-                    market=indicator.market
-                )
-                results.append(f"Fetched {len(data_points)} data points")
+            collector = CollectorRegistry.get("FRED")
+            data_points = await collector.fetch(
+                indicator_id=indicator.id,
+                series_id=indicator.series_id,
+                market=indicator.market
+            )
+            results.append(f"Fetched {len(data_points)} data points")
 
-                if data_points:
-                    await repo.save_data_points(data_points)
-                    results.append(f"Saved {len(data_points)} data points")
-            else:
-                errors.append("FRED collector not found")
+            if data_points:
+                await repo.save_data_points(data_points)
+                results.append(f"Saved {len(data_points)} data points")
         except Exception as e:
             errors.append(f"Error: {str(e)}")
 
