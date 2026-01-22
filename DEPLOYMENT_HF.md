@@ -1,19 +1,47 @@
-# 🤗 Hugging Face Spaces 部署指南
+# 🚀 Liquidity Monitor 部署指南
 
-完全免费，无需信用卡，不会休眠！
+完全免费的部署方案：**Hugging Face Spaces (后端) + Vercel (前端)**
 
-## 📋 部署步骤
+## 🌐 在线演示
 
-### 1. 注册 Hugging Face 账号
-访问：https://huggingface.co/join
-- 使用邮箱注册（免费）
-- 验证邮箱
+- **前端界面**: https://liquid-pi.vercel.app
+- **后端 API**: https://richzhang666-liquid-monitor.hf.space
+- **API 文档**: https://richzhang666-liquid-monitor.hf.space/docs
 
-### 2. 创建新 Space
+---
+
+## 📋 前置准备
+
+### 1. 注册账号（免费）
+- [GitHub](https://github.com/join) - 代码托管
+- [Hugging Face](https://huggingface.co/join) - 后端部署
+- [Vercel](https://vercel.com/signup) - 前端部署
+
+### 2. 获取 API 密钥（可选）
+- [FRED API](https://fred.stlouisfed.org/docs/api/api_key.html) - 美国市场数据（免费）
+- [Anthropic API](https://console.anthropic.com) - AI 分析功能（需付费）
+
+---
+
+## 🔧 第一步：准备代码
+
+### 1. Fork 仓库
+访问 https://github.com/takizhang/liquid 点击 "Fork"
+
+### 2. 克隆到本地（可选）
+```bash
+git clone https://github.com/你的用户名/liquid.git
+cd liquid
+```
+
+---
+
+## 🐳 第二步：部署后端到 Hugging Face Spaces
+
+### 1. 创建 Space
 访问：https://huggingface.co/new-space
 
 填写信息：
-- **Owner**: 你的用户名
 - **Space name**: `liquid-monitor`（或任意名字）
 - **License**: MIT
 - **Select the Space SDK**: **Docker**（重要！）
@@ -22,94 +50,123 @@
 
 点击 **"Create Space"**
 
-### 3. 连接 GitHub 仓库
+### 2. 推送代码到 Space
 
-#### 方式一：直接推送（推荐）
-
-在你的本地项目目录运行：
+#### 方式一：通过 Git（推荐）
 
 ```bash
-# 添加 Hugging Face 远程仓库
+# 获取 Hugging Face Access Token
+# 访问 https://huggingface.co/settings/tokens
+# 创建 Write 权限的 token
+
+# 添加远程仓库
 git remote add hf https://huggingface.co/spaces/你的用户名/liquid-monitor
 
 # 推送代码
 git push hf main
+# 输入用户名和 token
 ```
 
 #### 方式二：通过 Web 界面
 
 1. 在 Space 页面点击 "Files and versions"
-2. 点击 "Add file" → "Upload files"
-3. 上传以下文件：
+2. 上传以下文件：
    - `Dockerfile`
-   - `README_HF.md`（重命名为 `README.md`）
-   - `backend/` 整个目录
-   - `config/` 整个目录
-   - `.env.example`
+   - `README.md`
+   - `backend/` 目录
+   - `config/` 目录
 
-### 4. 配置环境变量
+### 3. 配置环境变量
 
 在 Space 页面：
 1. 点击 **"Settings"** 标签
 2. 滚动到 **"Repository secrets"**
 3. 添加以下密钥：
 
-| Name | Value |
-|------|-------|
-| `FRED_API_KEY` | 你的 FRED API 密钥 |
-| `ANTHROPIC_API_KEY` | 你的 Anthropic API 密钥 |
-| `LLM_PROVIDER` | `anthropic` |
-| `COINGECKO_API_KEY` | 你的 CoinGecko API 密钥（可选）|
+| Name | Value | 说明 |
+|------|-------|------|
+| `FRED_API_KEY` | 你的密钥 | 美国市场数据（可选）|
+| `ANTHROPIC_API_KEY` | 你的密钥 | AI 分析功能（可选）|
+| `LLM_PROVIDER` | `anthropic` | AI 提供商 |
 
-### 5. 等待构建
+### 4. 等待构建
 
 - Space 会自动开始构建（5-10 分钟）
 - 在 "Logs" 标签查看构建进度
-- 构建成功后，Space 会自动运行
+- 构建成功后，Space 状态显示 "Running"
 
-### 6. 获取后端 URL
+### 5. 测试后端
 
-部署成功后，你的后端地址为：
-```
-https://你的用户名-liquid-monitor.hf.space
-```
-
-测试后端：
 ```bash
 curl https://你的用户名-liquid-monitor.hf.space/api/health
 ```
 
----
-
-## 🎨 部署前端到 Vercel
-
-后端部署完成后，部署前端：
-
-### 1. 访问 Vercel
-https://vercel.com/new
-
-### 2. 导入 GitHub 仓库
-- 选择 `takizhang/liquid` 仓库
-- Root Directory: `frontend`
-- Framework Preset: Vite
-- 点击 "Deploy"
-
-### 3. 设置环境变量
-在 Vercel 项目设置中添加：
+应返回：
+```json
+{
+  "status": "healthy",
+  "timestamp": "..."
+}
 ```
-VITE_API_URL=https://你的用户名-liquid-monitor.hf.space
-```
-
-### 4. 重新部署
-添加环境变量后，点击 "Redeploy"
 
 ---
 
-## 🔗 更新后端 CORS
+## 🎨 第三步：部署前端到 Vercel
 
-部署完成后，需要更新后端 CORS 配置以允许 Vercel 前端访问。
+### 1. 导入项目
 
-编辑 `backend/api/main.py`，将 Vercel 域名添加到允许列表：
+访问：https://vercel.com/new
+
+- 选择 "Import Git Repository"
+- 选择你 Fork 的 `liquid` 仓库
+- 点击 "Import"
+
+### 2. 配置项目
+
+**Framework Preset**: Vite（自动检测）
+
+**Root Directory**: `frontend`（重要！）
+
+**Build Command**: `npm run build`（自动填充）
+
+**Output Directory**: `dist`（自动填充）
+
+### 3. 添加环境变量
+
+在配置页面点击 "Environment Variables"，添加：
+
+| Name | Value |
+|------|-------|
+| `VITE_API_URL` | `https://你的用户名-liquid-monitor.hf.space` |
+
+**注意**：替换为你的 Hugging Face Space 地址
+
+### 4. 部署
+
+点击 **"Deploy"** 按钮
+
+等待 2-3 分钟，部署完成后会显示：
+```
+https://你的项目名.vercel.app
+```
+
+### 5. 测试前端
+
+访问你的 Vercel 地址，检查：
+- ✅ 页面正常加载
+- ✅ 市场数据正常显示
+- ✅ 图表正常渲染
+- ✅ 无 CORS 错误
+
+---
+
+## 🔗 第四步：连接前后端
+
+### 1. 更新后端 CORS
+
+如果前端无法访问后端，需要更新 CORS 配置：
+
+编辑 `backend/api/main.py`：
 
 ```python
 app.add_middleware(
@@ -132,65 +189,124 @@ git push origin main
 git push hf main  # 推送到 Hugging Face
 ```
 
+### 2. 验证连接
+
+访问前端，打开浏览器控制台（F12），检查：
+- Network 标签：API 请求返回 200
+- Console 标签：无 CORS 错误
+
 ---
 
-## ✅ 验证部署
+## 💡 第五步：初始化数据（可选）
 
-### 测试后端
+### 方式一：通过 API 文档
+
+1. 访问 `https://你的后端.hf.space/docs`
+2. 测试各个端点
+3. 数据会自动保存到数据库
+
+### 方式二：运行初始化脚本（本地）
+
 ```bash
-curl https://你的用户名-liquid-monitor.hf.space/api/health
+cd backend
+source venv/bin/activate
+PYTHONPATH=".." python scripts/init_data.py
 ```
-
-应返回：
-```json
-{
-  "status": "healthy",
-  "timestamp": "2026-01-22T..."
-}
-```
-
-### 测试前端
-访问你的 Vercel 地址，检查：
-- 页面正常加载
-- API 数据正常显示
-- 无 CORS 错误
 
 ---
 
-## 💡 优势
+## ✅ 部署完成检查清单
 
-✅ **完全免费**：无需信用卡
-✅ **不会休眠**：24/7 运行
-✅ **自动部署**：推送代码自动更新
-✅ **强大资源**：2 vCPU + 16GB RAM
-✅ **适合 AI 项目**：Hugging Face 专为 AI 应用设计
+- [ ] 后端 Space 状态显示 "Running"
+- [ ] 后端健康检查返回 200
+- [ ] 前端页面正常加载
+- [ ] 前端可以获取后端数据
+- [ ] 无 CORS 错误
+- [ ] API 文档可访问
+
+---
+
+## 🔄 自动部署
+
+### GitHub 集成
+
+- **Hugging Face**: 推送到 `main` 分支自动部署后端
+- **Vercel**: 推送到任何分支自动部署前端
+
+### 手动触发
+
+- Hugging Face: Space 页面 → "Factory reboot"
+- Vercel: Dashboard → "Redeploy"
+
+---
+
+## 💰 成本总结
+
+| 服务 | 免费额度 | 限制 |
+|------|---------|------|
+| Hugging Face Spaces | 无限制 | CPU 基础版 |
+| Vercel | 100GB 带宽/月 | 个人项目 |
+| **总计** | **完全免费** | 适合个人使用 |
 
 ---
 
 ## 🆘 常见问题
 
-### Q: 构建失败怎么办？
-A: 查看 "Logs" 标签，检查错误信息。常见问题：
+### Q: Hugging Face Space 构建失败
+A: 查看 Logs 标签，常见问题：
 - 缺少依赖：检查 `requirements.txt`
 - 端口错误：确保使用端口 7860
+- 数据库错误：检查 `backend/data` 目录权限
+
+### Q: Vercel 部署失败
+A: 检查：
+- Root Directory 是否设置为 `frontend`
+- 环境变量 `VITE_API_URL` 是否正确
+- Build Command 是否为 `npm run build`
+
+### Q: CORS 错误
+A: 确保后端 `allow_origins` 包含你的 Vercel 域名
 
 ### Q: API 请求失败
 A: 检查：
-1. Space 是否正在运行（状态显示 "Running"）
-2. 环境变量是否正确设置
-3. CORS 配置是否包含 Vercel 域名
+1. 后端 Space 是否正在运行
+2. Vercel 环境变量是否正确设置
+3. 浏览器控制台是否有错误信息
 
-### Q: 如何查看日志？
-A: 在 Space 页面点击 "Logs" 标签
+### Q: 数据为空
+A: 需要配置 API 密钥并运行数据初始化脚本
 
 ---
 
 ## 🎯 下一步
 
-部署完成后：
-1. 测试所有 API 端点
-2. 运行数据初始化脚本
-3. 配置定时任务（如果需要）
-4. 绑定自定义域名（可选）
+部署完成后，你可以：
 
-需要帮助？随时问我！
+1. **绑定自定义域名**
+   - Vercel: Settings → Domains
+   - Hugging Face: 暂不支持
+
+2. **配置 CI/CD**
+   - GitHub Actions 自动测试
+   - 自动部署到生产环境
+
+3. **添加监控**
+   - Vercel Analytics
+   - Sentry 错误追踪
+
+4. **优化性能**
+   - 启用 CDN
+   - 配置缓存策略
+
+---
+
+## 📚 相关资源
+
+- [Hugging Face Spaces 文档](https://huggingface.co/docs/hub/spaces)
+- [Vercel 文档](https://vercel.com/docs)
+- [FastAPI 文档](https://fastapi.tiangolo.com)
+- [React 文档](https://react.dev)
+
+---
+
+需要帮助？提交 Issue：https://github.com/takizhang/liquid/issues
