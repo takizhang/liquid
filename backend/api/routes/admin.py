@@ -59,6 +59,27 @@ async def trigger_data_collection():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/debug/{indicator_id}")
+async def debug_indicator(indicator_id: str):
+    """Debug indicator unit_divisor."""
+    from backend.storage import get_session, IndicatorRepository
+    session = await get_session()
+    repo = IndicatorRepository(session)
+    indicator = await repo.get_indicator(indicator_id)
+    await session.close()
+
+    if not indicator:
+        return {"error": "not found"}
+
+    return {
+        "id": indicator.id,
+        "name": indicator.name,
+        "unit": indicator.unit,
+        "unit_divisor": indicator.unit_divisor,
+        "unit_divisor_type": str(type(indicator.unit_divisor))
+    }
+
+
 @router.post("/collect-sync")
 async def collect_data_sync():
     """Synchronously collect data for debugging."""
