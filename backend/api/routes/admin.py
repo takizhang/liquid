@@ -22,28 +22,25 @@ async def initialize_indicators():
 
         indicators_created = 0
 
-        # Process each market
-        for market in config.get("markets", []):
-            market_id = market["id"]
+        # Process indicators (they're at top level, not under markets)
+        for indicator_config in config.get("indicators", []):
+            # Create indicator object
+            indicator = Indicator(
+                id=indicator_config["id"],
+                name=indicator_config["name"],
+                name_en=indicator_config.get("name_en", indicator_config["name"]),
+                market=indicator_config["market"],
+                source=indicator_config["source"],
+                series_id=indicator_config.get("series_id"),
+                unit=indicator_config.get("unit", ""),
+                description=indicator_config.get("description", ""),
+                is_primary=indicator_config.get("is_primary", False),
+                direction=indicator_config.get("direction", "up_is_loose")
+            )
 
-            for indicator_config in market.get("indicators", []):
-                # Create indicator object
-                indicator = Indicator(
-                    id=indicator_config["id"],
-                    name=indicator_config["name"],
-                    name_en=indicator_config.get("name_en", indicator_config["name"]),
-                    market=market_id,
-                    source=indicator_config["source"],
-                    series_id=indicator_config.get("series_id"),
-                    unit=indicator_config.get("unit", ""),
-                    description=indicator_config.get("description", ""),
-                    is_primary=indicator_config.get("is_primary", False),
-                    direction=indicator_config.get("direction", "up_is_loose")
-                )
-
-                # Save to database
-                await repo.save_indicator(indicator)
-                indicators_created += 1
+            # Save to database
+            await repo.save_indicator(indicator)
+            indicators_created += 1
 
         await session.close()
 
