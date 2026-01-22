@@ -25,6 +25,7 @@ class Indicator(Base):
     description = Column(String)
     update_frequency = Column(String)
     is_primary = Column(Integer, default=0)
+    is_computed = Column(Integer, default=0)
     enabled = Column(Integer, default=1)
 
     # New fields for v2

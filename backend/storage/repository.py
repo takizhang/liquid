@@ -35,6 +35,7 @@ class IndicatorRepository:
             description=indicator_config.get("description"),
             update_frequency=indicator_config.get("update_frequency"),
             is_primary=1 if indicator_config.get("is_primary") else 0,
+            is_computed=1 if indicator_config.get("is_computed") else 0,
             enabled=0 if indicator_config.get("enabled") is False else 1,
             tags=indicator_config.get("tags", []),
             dependencies=indicator_config.get("dependencies", []),
