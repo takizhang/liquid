@@ -32,10 +32,24 @@ export const IndicatorDetail = () => {
 
   const formatValue = (value: number | undefined | null, unit?: string) => {
     if (value === undefined || value === null) return '-';
-    if (unit === 'T') return `$${value.toFixed(2)}T`;
-    if (unit === 'B') return `$${value.toFixed(1)}B`;
-    if (unit === '%') return `${value.toFixed(2)}%`;
-    return value.toFixed(2);
+
+    // Format number with appropriate precision
+    let formatted: string;
+    if (value >= 1000) {
+      formatted = value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    } else if (value >= 1) {
+      formatted = value.toFixed(2);
+    } else {
+      formatted = value.toFixed(4);
+    }
+
+    // Add unit
+    if (!unit) return formatted;
+    if (unit === '$') return `$${formatted}`;
+    if (unit === '%') return `${formatted}%`;
+    if (unit === 'T') return `$${formatted}T`;
+    if (unit === 'B') return `$${formatted}B`;
+    return `${formatted} ${unit}`;
   };
 
   const formatChange = (change: number | undefined) => {
