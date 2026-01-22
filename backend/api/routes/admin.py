@@ -2,6 +2,7 @@
 from fastapi import APIRouter, HTTPException
 from backend.storage import get_session, IndicatorRepository, init_db
 from backend.storage.models import Indicator
+from backend.core import CollectorRegistry
 import yaml
 from pathlib import Path
 
@@ -77,6 +78,17 @@ async def debug_indicator(indicator_id: str):
         "unit": indicator.unit,
         "unit_divisor": indicator.unit_divisor,
         "unit_divisor_type": str(type(indicator.unit_divisor))
+    }
+
+
+@router.get("/env-check")
+async def check_env():
+    """Check environment variables."""
+    import os
+    return {
+        "FRED_API_KEY": bool(os.getenv("FRED_API_KEY")),
+        "COINGECKO_API_KEY": bool(os.getenv("COINGECKO_API_KEY")),
+        "collectors": list(CollectorRegistry._collectors.keys()) if hasattr(CollectorRegistry, '_collectors') else []
     }
 
 
